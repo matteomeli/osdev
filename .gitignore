@@ -27,6 +27,10 @@
 *.i*86
 *.x86_64
 *.hex
+*.elf
 
 # Debug files
 *.dSYM/
+
+# ISO image
+*.iso
