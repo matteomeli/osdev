@@ -1,6 +1,6 @@
-# osdev
+# OS Development
 
-Experimenting with OS development.
+Experimenting with OS stuff.
 
 ### References
 
