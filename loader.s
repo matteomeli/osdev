@@ -17,11 +17,11 @@ align 4                                     ; the code must be 4 byte aligned
     dd FLAGS                                ; the flags,
     dd CHECKSUM                             ; and the checksum
 
-mov esp, kernel_stack + KERNEL_STACK_SIZE   ; point esp to the start of the
-                                            ; stack (end of memory area)
-
 loader:                                     ; the loader label (defined as entry point in linker script)
+    mov esp, kernel_stack + KERNEL_STACK_SIZE   ; point esp to the start of the
+                                                ; stack (end of memory area)
     extern kmain                            ; the function kmain is defined elsewhere
+
     call kmain                              ; call the function, the result will be in eax
 .loop:
     jmp .loop                               ; loop forever

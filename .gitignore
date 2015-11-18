@@ -34,3 +34,6 @@
 
 # ISO image
 *.iso
+
+# Bochs
+bochslog.*
