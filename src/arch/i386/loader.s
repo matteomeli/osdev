@@ -12,6 +12,18 @@ align 4                                     ; the code must be 4 byte aligned
     dd CHECKSUM                             ; and the checksum
 
 loader:                                     ; the loader label (defined as entry point in linker script)
+    mov esp, kernel_stack_top               ; point esp to the start of the stack (end of memory, stack grows downwards)
+
+    ; call the rust main
+    extern rust_main
+    call rust_main
+
     ; print `OK` to screen
     mov dword [0xb8000], 0x2f4b2f4f
     hlt
+
+section .bss:
+align 4
+kernel_stack_bottom:
+    resb 64                                 ; reserve 64 bytes for the kernel stack
+kernel_stack_top:
