@@ -1,6 +1,6 @@
-# OS Development
+# OS Development With Rust
 
-Experimenting with OS stuff.
+Experimenting with OS stuff and Rust.
 
 ### References
 
