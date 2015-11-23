@@ -1,4 +1,4 @@
 [root]
-name = "my_os"
+name = "rustos"
 version = "0.1.0"
 
