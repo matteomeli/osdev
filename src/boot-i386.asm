@@ -1,4 +1,4 @@
-global loader                               ; the entry symbol for ELF
+global start                                ; the entry symbol for ELF
 
 MAGIC_NUMBER        equ 0x1BADB002          ; define the magic number constant
 FLAGS               equ 0x0                 ; multiboot flags
@@ -11,7 +11,7 @@ align 4                                     ; the code must be 4 byte aligned
     dd FLAGS                                ; the flags,
     dd CHECKSUM                             ; and the checksum
 
-loader:                                     ; the loader label (defined as entry point in linker script)
+start:                                      ; the start label (defined as entry point in linker script)
     mov esp, kernel_stack_top               ; point esp to the start of the stack (end of memory, stack grows downwards)
 
     ; call the rust main
