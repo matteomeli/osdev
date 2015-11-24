@@ -1,5 +1,7 @@
-ARCH ?= i386
-#ARCH ?= x86_64
+SHELL := /bin/bash
+
+#ARCH ?= i386
+ARCH ?= x86_64
 
 BUILD := build/$(ARCH)
 KERNEL := $(BUILD)/kernel.bin
@@ -44,16 +46,36 @@ directories: $(BUILD)
 
 all: directories $(KERNEL)
 
-qemu: $(ISO)
-	@qemu-system-$(ARCH) -hda $(ISO)
+run: $(ISO)
+	if [ "$(ARCH)" == "x86_64" ];			\
+	then									\
+		qemu-system-$(ARCH) -hda $(ISO);	\
+	else									\
+		bochs -f src/bochs.$(ARCH) -q;		\
+	fi;										\
 
 iso: $(ISO)
 
-$(ISO): $(KERNEL) $(GRUB_CFG)
+$(ISO): all
 	$(MKDIR) $(BUILD)/iso/boot/grub
 	$(CP) $(KERNEL) $(BUILD)/iso/boot/kernel.bin
 	$(CP) $(GRUB_CFG) $(BUILD)/iso/boot/grub
-	$(GRUB_MAKE) -o $(ISO) $(BUILD)/iso 2> /dev/null
+	if [ "$(ARCH)" == "x86_64" ]; 							\
+	then 													\
+		$(GRUB_MAKE) -o $(ISO) $(BUILD)/iso 2> /dev/null;	\
+	else 													\
+		$(CP) src/stage2_eltorito $(BUILD)/iso/boot/grub;		\
+		genisoimage -R                              \
+                    -b boot/grub/stage2_eltorito    \
+                    -no-emul-boot                   \
+                    -boot-load-size 4               \
+                    -A os                           \
+                    -input-charset utf8             \
+                    -quiet                          \
+                    -boot-info-table                \
+                    -o os.iso                       \
+                    $(BUILD)/iso;					\
+	fi;
 	$(RM) -r $(BUILD)/iso
 
 $(KERNEL): cargo $(BUILD)/kernel.o $(LINKER_SCRIPT)
