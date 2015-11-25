@@ -5,3 +5,6 @@ authors = ["Matteo Meli <matteo.meli@gmail.com>"]
 
 [lib]
 crate-type = ["staticlib"]
+
+[dependencies]
+rlibc = "0.1.4"
