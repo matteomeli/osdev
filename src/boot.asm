@@ -65,8 +65,57 @@ test_long_mode:
     mov al, "2"
     jmp error
 
+; Setup Paging. 
+; In Long Mode, x86 use a 4 level page table with page size of 4096
+; Each page table contains 512 entries, each entry is 8 bytes (512*8=4096)
+; Each 64bit virtual address is used to index the the tables:
+;   1) First 9 bits entry (2^9 = 512 entries) in PML4 table (base address in CR3 register)
+;   2) Second 9 bits offset in PDP table
+;   3) Third 9 bits offset in PD table
+;   4) Fourth 9 bits offset in PT (Page Table) table
+;   5) Last 12 bits to offset 4K physical memory page (2^12 = 4096)
+;   NM) Bits 48-63 rest unused, actual copies of bit 47.
+; Each entry in the tables contains the page aligned 52bit physical address of
+; the next table, ORed in with some bit flags (present 0, writable 1, etc.).
+; Finally, to identity map the first gigabytes of memory, use the following mapping:
+; 1 PML4 -> 1 PDP -> 512 2MiB PD tables
+setup_page_tables:
+    ; map first P4 entry to P3
+    mov eax, p3_table
+    or eax, 0b11            ; Set present and writable flags
+    mov [p4_table], eax     ; p4_table is a address. [addr] deferences the memory at the addr
+
+    ; map first P3 entry to P2
+    mov eax, p2_table
+    or eax, 0b11            ; Set present and writable flags
+    mov [p3_table], eax
+
+    ; map each P2 entry to a 2MiB page
+    mov ecx, 0              ; counter variable
+
+.map_p2_table:
+    ; map ecx-th P2 entry to a huge page that start at address ecx*2MiB
+    mov eax, 0x200000               ; 2 MiB
+    mul ecx                         ; Multiply what's in eax with ecx and store in eax (start address of ecx-th page)
+    or eax, 0b10000011              ; Set present, writable and huge page (in P2 means 2 MiB pages) flags
+    mov [p2_table + ecx * 8], eax   ; Set each ecx-th entry of P2 to the ecx-th page
+
+    inc ecx                         ; Increment counter
+    cmp ecx, 512                    ; if ecx == 512, we're done
+    jne .map_p2_table               ; else loop again
+
+    ret
+
+; TODO: Enable paging
+
 section .bss:
-align 4
+align 4096
+p4_table:                   ; Page-Map Level-4 Table (PML4) or P4
+    resb 4096
+p3_table:                   ; Page-Directory Pointer Table (PDP) or P3
+    resb 4096
+p2_table:                   ; Page-Directory Table (PD) or P2
+    resb 4096
 kernel_stack_bottom:
-    resb 64                             ; reserve 64 bytes for the kernel stack
+    resb 64                 ; reserve 64 bytes for the kernel stack
 kernel_stack_top:
