@@ -37,3 +37,7 @@
 
 # Bochs
 bochslog.*
+
+# Build objects & per platform target objects
+build/
+target/

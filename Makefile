@@ -1,37 +1,56 @@
-OBJECTS = loader.o kmain.o
-CC = gcc
-CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-		 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
-LDFLAGS = -T link.ld -melf_i386
+SHELL := /bin/bash
+
+ARCH ?= x86_64
+
+BUILD := build/$(ARCH)
+KERNEL := $(BUILD)/kernel.bin
+ISO := $(BUILD)/os.iso
+
+LINKER_SCRIPT := src/linker.ld
+GRUB_MAKE := grub-mkrescue
+
 AS = nasm
-ASFLAGS = -f elf
+LD = ld
+MKDIR = mkdir -p
+CP = cp
+RM = rm
 
-all: kernel.elf
+GRUB_CFG := src/grub.cfg
+TARGET = $(ARCH)-unknown-linux-gnu
+RUST_OS := target/$(TARGET)/debug/librustos.a
 
-kernel.elf: $(OBJECTS)
-	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
+ASMSRCFILES := $(wildcard src/*.asm)
+ASMOBJFILES := $(patsubst src/%.asm, $(BUILD)/%.o, $(ASMSRCFILES))
 
-os.iso: kernel.elf
-	cp kernel.elf iso/boot/kernel.elf
-	genisoimage -R                              \
-				-b boot/grub/stage2_eltorito    \
-				-no-emul-boot                   \
-				-boot-load-size 4               \
-				-A os                           \
-				-input-charset utf8             \
-				-quiet                          \
-				-boot-info-table                \
-				-o os.iso                       \
-				iso
+.PHONY: directories all iso qemu clean
 
-run: os.iso
-	bochs -f bochsrc.txt -q
+$(BUILD):
+	$(MKDIR) $@
 
-%.o: %.c
-	$(CC) $(CFLAGS)  $< -o $@
+directories: $(BUILD)
 
-%.o: %.s
-	$(AS) $(ASFLAGS) $< -o $@
+all: directories $(KERNEL)
+
+run: $(ISO)
+	qemu-system-$(ARCH) -hda $(ISO)
+
+iso: $(ISO)
+
+$(ISO): all
+	$(MKDIR) $(BUILD)/iso/boot/grub
+	$(CP) $(KERNEL) $(BUILD)/iso/boot/kernel.bin
+	$(CP) $(GRUB_CFG) $(BUILD)/iso/boot/grub
+	$(GRUB_MAKE) -o $(ISO) $(BUILD)/iso 2> /dev/null
+	$(RM) -r $(BUILD)/iso
+
+$(KERNEL): cargo $(ASMOBJFILES) $(LINKER_SCRIPT)
+	$(LD) -m elf_$(ARCH) -n --gc-sections -T $(LINKER_SCRIPT) -o $@ $(ASMOBJFILES) $(RUST_OS)
+
+cargo:
+	@cargo rustc --target $(TARGET) -- -Z no-landing-pads
+
+$(BUILD)/%.o: src/%.asm
+	$(AS) -f elf64 -o $@ $<
 
 clean:
-	rm -rf *.o kernel.elf os.iso
+	$(RM) -rf build target
