@@ -1,3 +1,16 @@
+
+// The VGA text framebuffer addrees in memory
+const FRAMEBUFFER: u32 = 0x000B8000;
+
+pub fn fb_write_cell(i: isize, c: char, fg: u8, bg: u8) {
+    let fb: *mut u8 = FRAMEBUFFER as *mut _;
+    unsafe {
+        *fb.offset(i) = c as u8;    // char type is 32-bit Unicode in Rust
+                                    // needs to cast it to 8bit ASCII
+        *fb.offset(i + 1) = ((fg & 0x0F) << 4) | (bg & 0x0F);
+    }
+}
+
 /*
 #[repr(u8)]
 pub enum Color {
