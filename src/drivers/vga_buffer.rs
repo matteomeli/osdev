@@ -2,6 +2,12 @@
 // The VGA text framebuffer addrees in memory
 const FRAMEBUFFER: u32 = 0x000B8000;
 
+/// Writes a character with the given foreground and background 
+/// to position i in the framebuffer.
+///
+/// # Safety
+/// Rust does not know the VGA text framebuffer and thus cannot 
+/// guarantee that writing to it will be safe.
 pub fn fb_write_cell(i: isize, c: char, fg: u8, bg: u8) {
     let fb: *mut u8 = FRAMEBUFFER as *mut _;
     unsafe {
