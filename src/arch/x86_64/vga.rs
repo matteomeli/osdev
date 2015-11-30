@@ -1,8 +1,10 @@
+//! A wrapper around the VGA framebuffer.
 // Based on http://os.phil-opp.com/printing-to-screen.html
 
 use core::fmt::{Write, Result};
 use core::ptr::Unique;
 use spin::Mutex;
+use arch::cpuio::Port;
 
 const HEIGHT: usize = 25;
 const WIDTH: usize = 80;
@@ -150,8 +152,29 @@ impl Write for Screen {
     }
 }
 
+pub struct Cursor {
+    command_port: Port<u8>,
+    data_port: Port<u8>,
+}
+
+impl Cursor {
+    pub fn set(&mut self, row: usize, col: usize) {
+        let position: usize = (row * WIDTH) + col;
+
+        self.command_port.write(0x0E);
+        self.data_port.write(0x00);
+        self.command_port.write(0x0F);
+        self.data_port.write(0x50);
+    }
+}
+
 pub static SCREEN: Mutex<Screen> = Mutex::new(Screen {
     col: 0,
     colors: ColorCode::new(Color::White, Color::Black),
     buffer: unsafe { Unique::new(0xb8000 as *mut _) },
+});
+
+pub static CURSOR: Mutex<Cursor> = Mutex::new(Cursor {
+    command_port: unsafe { Port::new(0x3D4) },
+    data_port: unsafe { Port::new(0x3D5) }
 });

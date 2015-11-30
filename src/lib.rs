@@ -39,15 +39,16 @@ pub extern "C" fn rust_main() {
     // let _ = vga_buffer::VGAWRITER.lock().write_str("Hello again");
     // let _ = write!(vga_buffer::VGAWRITER.lock(), ", some numbers: {} {}", 42, 1.337);
 
-    use arch::vga::{SCREEN, ColorCode};
+    use arch::vga::{SCREEN, CURSOR, ColorCode};
     use arch::vga::Color::*;
 
     SCREEN.lock()
         .clear_with_color(DarkGrey)
         .set_colors(ColorCode::new(Yellow, DarkGrey));
-    print!("Hello World!");
+    //print!("Hello World!");
+    //CURSOR.lock().set(1, 0);
 
-    loop {}
+    //loop {}
 }
 
 // These functions and traits are used by the compiler, but not
