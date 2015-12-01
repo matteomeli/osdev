@@ -81,7 +81,7 @@ impl Screen {
         self
     }
 
-    /// Write the string `s` to screen
+    /// Write the string `s` to screen.
     pub fn write(&mut self, s: &str) {
         self.write_bytes(s.as_bytes())
     }
