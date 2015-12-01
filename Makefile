@@ -26,11 +26,11 @@ clean:
 
 run: $(ISO)
 	@echo QEMU $(ISO)
-	@qemu-system-$(ARCH) -hda $(ISO)
+	@qemu-system-$(ARCH) -hda $(ISO) -serial stdio
 
 debug: $(ISO)
 	@echo QEMU -d int $(ISO)
-	@qemu-system-$(ARCH) -hda $(ISO) -d int -no-reboot
+	@qemu-system-$(ARCH) -hda $(ISO) -d int -no-reboot -serial stdio
 
 $(ISO): $(KERNEL) $(GRUB_CFG)
 	@echo ISO $(ISO)

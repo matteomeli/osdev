@@ -1,4 +1,5 @@
 //! Wrappers around x86 I/O instructions.
+// Based on http://www.randomhacks.net/2015/11/09/bare-metal-rust-cpu-port-io/
 
 use core::marker::PhantomData;
 

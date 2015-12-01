@@ -1,4 +1,4 @@
-//! A wrapper around the VGA framebuffer.
+//! Basic VGA framebuffer driver.
 // Based on http://os.phil-opp.com/printing-to-screen.html
 
 use core::fmt::{Write, Result};
@@ -129,6 +129,7 @@ impl Screen {
         }
         self.clear_row(HEIGHT - 1);
         self.col = 0;
+        CURSOR.lock().set(HEIGHT - 1, self.col);
     }
 
     fn clear_row(&mut self, row: usize) {
@@ -180,6 +181,6 @@ pub static SCREEN: Mutex<Screen> = Mutex::new(Screen {
 });
 
 pub static CURSOR: Mutex<Cursor> = Mutex::new(Cursor {
-    command_port: unsafe { Port::new(0x3D4) },
-    data_port: unsafe { Port::new(0x3D5) }
+    command_port: Port::new(0x3D4),
+    data_port: Port::new(0x3D5)
 });
