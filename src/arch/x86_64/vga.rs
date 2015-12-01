@@ -150,27 +150,27 @@ impl Write for Screen {
 
 /// A VGA screen cursor.
 pub struct Cursor {
-    command_port: Port<u8>,
-    data_port: Port<u8>,
+    command: Port<u8>,
+    data: Port<u8>,
 }
 
 impl Cursor {
     /// Enable the cursor.
     pub fn enable(&mut self) {
-        self.command_port.write(0x0A);
-        let dc = self.data_port.read() & 0x1F;
-        self.command_port.write(0x0A);
-        self.data_port.write(dc & !(0x20));
+        self.command.write(0x0A);
+        let dc = self.data.read() & 0x1F;
+        self.command.write(0x0A);
+        self.data.write(dc & !(0x20));
     }
 
     /// Set the cursor at the specific row and column.
     pub fn set(&mut self, row: usize, col: usize) {
         let position: usize = (row * WIDTH) + col;
 
-        self.command_port.write(0x0F);
-        self.data_port.write(position as u8 & 0xFF);
-        self.command_port.write(0x0E);
-        self.data_port.write(((position >> 8) as u8) & 0xFF);
+        self.command.write(0x0F);
+        self.data.write(position as u8 & 0xFF);
+        self.command.write(0x0E);
+        self.data.write(((position >> 8) as u8) & 0xFF);
     }
 }
 
@@ -181,6 +181,6 @@ pub static SCREEN: Mutex<Screen> = Mutex::new(Screen {
 });
 
 pub static CURSOR: Mutex<Cursor> = Mutex::new(Cursor {
-    command_port: Port::new(0x3D4),
-    data_port: Port::new(0x3D5)
+    command: Port::new(0x3D4),
+    data: Port::new(0x3D5)
 });
