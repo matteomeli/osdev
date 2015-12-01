@@ -63,18 +63,9 @@ pub struct Screen {
 impl Screen {
     /// Clear the screen.
     pub fn clear(&mut self) -> &mut Self {
-        for row in 0..HEIGHT {
-            self.clear_row(row);
-        }
-        self
-    }
-
-    /// Clear the screen with a specified color.
-    pub fn clear_with_color(&mut self, color: Color) -> &mut Self {
-        let colors = ColorCode::new(Color::White, color);
         let c = Char {
             code: b' ',
-            colors: colors,
+            colors: self.colors,
         };
         for row in 0..HEIGHT {
             for col in 0..WIDTH {
@@ -90,10 +81,12 @@ impl Screen {
         self
     }
 
+    /// Write the string `s` to screen
     pub fn write(&mut self, s: &str) {
         self.write_bytes(s.as_bytes())
     }
 
+    /// Write the `u8`-sized character array to screen.
     pub fn write_bytes(&mut self, text: &[u8]) {
         for c in text {
             self.write_byte(*c);
@@ -154,12 +147,14 @@ impl Write for Screen {
     }
 }
 
+/// A VGA screen cursor.
 pub struct Cursor {
     command_port: Port<u8>,
     data_port: Port<u8>,
 }
 
 impl Cursor {
+    /// Enable the cursor.
     pub fn enable(&mut self) {
         self.command_port.write(0x0A);
         let dc = self.data_port.read() & 0x1F;
@@ -167,6 +162,7 @@ impl Cursor {
         self.data_port.write(dc & !(0x20));
     }
 
+    /// Set the cursor at the specific row and column.
     pub fn set(&mut self, row: usize, col: usize) {
         let position: usize = (row * WIDTH) + col;
 

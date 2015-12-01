@@ -44,8 +44,8 @@ pub extern "C" fn rust_main() {
 
     CURSOR.lock().enable();
     SCREEN.lock()
-        .clear_with_color(Black)
-        .set_colors(ColorCode::new(White, Black));
+        .set_colors(ColorCode::new(White, Black))
+        .clear();
     print!("Hello World!");
 
     loop {}
