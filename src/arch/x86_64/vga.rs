@@ -71,7 +71,7 @@ impl Screen {
 
     /// Clear the screen with a specified color.
     pub fn clear_with_color(&mut self, color: Color) -> &mut Self {
-        let colors = ColorCode::new(color, color);
+        let colors = ColorCode::new(Color::White, color);
         let c = Char {
             code: b' ',
             colors: colors,
@@ -109,7 +109,7 @@ impl Screen {
                     self.new_line();
                 }
 
-                let row = HEIGHT - 1;
+                let row = HEIGHT - 2;
                 let col = self.col;
 
                 self.buffer()[row][col] = Char {
@@ -117,6 +117,8 @@ impl Screen {
                     colors: self.colors,
                 };
                 self.col += 1;
+
+                CURSOR.lock().set(HEIGHT - 1, self.col);
             }
         }
     }
@@ -158,13 +160,20 @@ pub struct Cursor {
 }
 
 impl Cursor {
+    pub fn enable(&mut self) {
+        self.command_port.write(0x0A);
+        let dc = self.data_port.read() & 0x1F;
+        self.command_port.write(0x0A);
+        self.data_port.write(dc & !(0x20));
+    }
+
     pub fn set(&mut self, row: usize, col: usize) {
         let position: usize = (row * WIDTH) + col;
 
-        self.command_port.write(0x0E);
-        self.data_port.write(0x00);
         self.command_port.write(0x0F);
-        self.data_port.write(0x50);
+        self.data_port.write(position as u8 & 0xFF);
+        self.command_port.write(0x0E);
+        self.data_port.write(((position >> 8) as u8) & 0xFF);
     }
 }
 

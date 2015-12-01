@@ -42,13 +42,13 @@ pub extern "C" fn rust_main() {
     use arch::vga::{SCREEN, CURSOR, ColorCode};
     use arch::vga::Color::*;
 
+    CURSOR.lock().enable();
     SCREEN.lock()
-        .clear_with_color(DarkGrey)
-        .set_colors(ColorCode::new(Yellow, DarkGrey));
-    //print!("Hello World!");
-    //CURSOR.lock().set(1, 0);
+        .clear_with_color(Black)
+        .set_colors(ColorCode::new(White, Black));
+    print!("Hello World!");
 
-    //loop {}
+    loop {}
 }
 
 // These functions and traits are used by the compiler, but not

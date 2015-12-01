@@ -5,13 +5,6 @@ bits 64
 long_mode_start:
     call setup_SSE
 
-    mov al, 0x0A
-    mov dx, 0x3D4
-    out dx, al
-
-    mov dx, 0x3D5
-    in al, dx
-
     ; call the rust main
     extern rust_main
     call rust_main
@@ -24,46 +17,6 @@ long_mode_start:
     mov [0xb8008], rax
     mov rax, 0x4f214f644f654f6e
     mov [0xb8010], rax
-
-    ; Activate cursor
-    mov al, 0ah
-    mov dx, 3d4h
-    out dx, al
-
-    mov dx, 3d5h
-    in al, dx   ; cursor start
-
-    mov cl, 1fh
-    and al, cl
-    mov bl, al  ; copy cursor start & 0xig in bl
-
-    mov al, 0ah
-    mov dx, 3d4h
-    out dx, al
-
-    mov al, 20h
-    not al
-    and bl, al
-
-    mov dx, 3d5h
-    out dx, al
-
-    ; set it to row 0 column 0
-    mov al, 0eh
-    mov dx, 3d4h
-    out dx, al
-
-    mov al, 00h
-    mov dx, 3d5h
-    out dx, al
-    
-    mov al, 0fh
-    mov dx, 3d4h
-    out dx, al
-
-    mov al, 00h
-    mov dx, 3d5h    
-    out dx, al
 
     hlt
 
