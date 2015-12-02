@@ -46,6 +46,17 @@ impl Pic {
     fn handles_interrupt(&self, interrupt_id: u8) -> bool {
         interrupt_id >= self.offset && interrupt_id < self.offset + 8
     }
+
+    /// Sets a mask for the Interrupt Mask register to ignore specific interrupts.
+    unsafe fn set_mask(&mut self, interrupt_id: u8) {
+        let value = self.data.read() | (1 << interrupt_id);
+        self.data.write(value);
+    }
+
+    unsafe fn clear_mask(&mut self, interrupt_id: u8) {
+        let value = self.data.read() & !(1 << interrupt_id);
+        self.data.write(value);
+    }
 }
 
 /// A pair of chained Pics. Standard way on modern x86 architecture.
@@ -131,4 +142,14 @@ impl ChainedPics {
             self.slave.end_of_interrupt();
         }
     }
+
+    pub unsafe fn set_mask(&mut self, interrupt_id: u8) {
+        if self.handles_interrupt(interrupt_id) {
+            if self.master.handles_interrupt(interrupt_id) {
+                self.master.set_mask(interrupt_id);
+            }
+            self.slave.set_mask(interrupt_id);
+        }
+    }
 }
+
