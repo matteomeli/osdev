@@ -1,2 +1,0 @@
-all:
-	cd C; make
