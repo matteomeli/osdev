@@ -9,4 +9,4 @@ Experimenting with OS stuff and Rust.
 * [University of Virginia - cs4414: Operating Systems](http://www.rust-class.org/)
 * [Writing an OS in Rust](http://os.phil-opp.com/)
 * [Rust Programming Language](https://www.rust-lang.org/)
-* [Bare Metal Rust: Building kernels in Rust]http://www.randomhacks.net/bare-metal-rust/
+* [Bare Metal Rust: Building kernels in Rust](http://www.randomhacks.net/bare-metal-rust/)

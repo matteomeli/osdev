@@ -1,8 +1,6 @@
 // https://doc.rust-lang.org/book/no-stdlib.html
 
-#![feature(no_std, lang_items)]
-#![feature(core_str_ext, const_fn, unique)]
-#![feature(asm)]
+#![feature(no_std, lang_items, core_str_ext, const_fn, unique, asm)]
 #![no_std]
 
 extern crate rlibc;
