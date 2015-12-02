@@ -1,7 +1,7 @@
 # Based on http://os.phil-opp.com/multiboot-kernel.html
 
 ARCH ?= x86_64
-TARGET ?= $(ARCH)-unknown-linux-gnu
+TARGET ?= $(ARCH)-unknown-none-gnu
 
 RUST_OS := target/$(TARGET)/debug/librustos.a
 KERNEL := build/kernel-$(ARCH).bin
@@ -52,3 +52,29 @@ build/arch/$(ARCH)/%.o: src/arch/$(ARCH)/%.asm
 	@echo NASM $<
 	@mkdir -p $(shell dirname $@)
 	@nasm -felf64 -o $@ $<
+
+# Recompile Rust for our bare metal target
+installed_target_libs := \
+	$(shell multirust which rustc | \
+		sed s,bin/rustc,lib/rustlib/$(target)/lib,)
+
+runtime_rlibs := \
+	$(installed_target_libs)/libcore.rlib
+
+RUSTC := \
+	rustc --verbose --target $(TARGET) \
+		-Z no-landing-pads \
+		--cfg disable_float \
+		--out-dir $(installed_target_libs)
+
+.PHONY: runtime
+
+runtime: $(runtime_rlibs)
+
+$(installed_target_libs):
+	@mkdir -p $(installed_target_libs)
+
+$(installed_target_libs)/%.rlib: rust/src/libcore/lib.rs $(installed_target_libs)
+	@echo RUSTC $<
+	@$(RUSTC) $<
+	@echo Check $(installed_target_libs)
