@@ -56,7 +56,7 @@ build/arch/$(ARCH)/%.o: src/arch/$(ARCH)/%.asm
 # Recompile Rust for our bare metal target
 installed_target_libs := \
 	$(shell multirust which rustc | \
-		sed s,bin/rustc,lib/rustlib/$(target)/lib,)
+		sed s,bin/rustc,lib/rustlib/$(TARGET)/lib,)
 
 runtime_rlibs := \
 	$(installed_target_libs)/libcore.rlib
