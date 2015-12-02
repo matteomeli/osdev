@@ -1,0 +1,4 @@
+[submodule "rust"]
+	path = rust
+	url = https://github.com/matteomeli/rust.git
+	branch = libcore_nofp
