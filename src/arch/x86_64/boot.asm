@@ -151,7 +151,7 @@ p2_table:                   ; Page-Directory Table (PD) or P2
 
 ;;; Reserve space for the kernel stack.
 kernel_stack_bottom:
-    resb 64                 ; reserve 64 bytes for the kernel stack
+    resb 8192               ; Reserve 8192 bytes for the kernel stack
 kernel_stack_top:
 
 section .rodata

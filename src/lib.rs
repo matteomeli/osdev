@@ -1,6 +1,6 @@
 // https://doc.rust-lang.org/book/no-stdlib.html
 
-#![feature(no_std, lang_items, core_str_ext, const_fn, unique, asm)]
+#![feature(no_std, lang_items, core_str_ext, core_slice_ext, const_fn, unique, asm)]
 #![no_std]
 
 extern crate rlibc;
@@ -23,6 +23,12 @@ pub extern "C" fn rust_main() {
         .set_colors(ColorCode::new(White, Black))
         .clear();
     println!("Hello World!");
+
+    unsafe {
+        arch::interrupts::init();
+    }
+
+    println!("Running...");
 
     loop {}
 }

@@ -1,3 +1,4 @@
+;;; Interrupts support
 
 VGA_FB_BASE equ 0xB8000
 
@@ -9,7 +10,7 @@ extern rust_interrupt_handler
 section .text
 bits 64
 
-;;; This macro generate functions for non-error interrupts.
+;;; This macro generates functions for non-error interrupts.
 ;;;
 ;;; For consistency, push a 0 error code along 
 ;;; to the called interrupt handler.
@@ -20,7 +21,7 @@ interrupt_handler_%1:
     jmp interrupt_common_handler    ; Jump to the common handler function
 %endmacro
 
-;;; This macro generates functions for error coded intertrupts.
+;;; This macro generates functions for error coded interrupts.
 %macro error_code_interrupt_handler 1
 interrupt_handler_%1:
     ;; There's already a qword error code pushed here.
@@ -78,7 +79,7 @@ interrupt_common_handler:
     pop_caller_saved_registers
 
     ;; Restore ESP
-    mov rsp, 16     ; Clean error code and interrupt ID placed here before
+    add rsp, 16     ; Clean error code and interrupt ID placed here before
 
     iretq
 
@@ -138,12 +139,12 @@ no_error_code_interrupt_handler 18
 no_error_code_interrupt_handler 19
 
 ;;; Generate all the 32-255 Hardware Interrupts (PIC managed)
-%assign i 32
+no_error_code_interrupt_handler 32
+%assign i 33
 %rep 224
 no_error_code_interrupt_handler i
 %assign i i+1
 %endrep
-
 
 section .rodata
 interrupt_handlers:
