@@ -10,7 +10,7 @@
 //! In protected mode, the IRQ0-7 of PIC1 start at offset 0x08 to 0x0F and
 //! IRQ8-15 of PIC2 follow at 0x70 to 0x77. There are 3 classes of interrupts:
 //! exceptions (generated internally by the CPU), IRQ or Hardware Interrupt 
-//! (managed by the PIC) and software interrutps (coming from programs, usually
+//! (managed by the PIC) and Software Interrutps (coming from programs, usually
 //! system calls).
 //!
 //! The problem here is that, because of a bug in the IBM design, 
@@ -19,6 +19,7 @@
 //! Therefore we move PC1 to offset 0x20 to 0x2F and PIC2 to 0x28-0x2F.
 
 use arch::cpuio::{Port, UnsafePort};
+use spin::Mutex;
 
 /// Command to initialise the PIC
 const CMD_INIT: u8 = 0x11;
@@ -152,4 +153,3 @@ impl ChainedPics {
         }
     }
 }
-

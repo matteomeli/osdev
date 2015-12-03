@@ -6,6 +6,8 @@
 extern crate rlibc;
 extern crate spin;
 
+pub use arch::interrupts::rust_interrupt_handler;
+
 #[macro_use]
 mod macros;
 mod arch;

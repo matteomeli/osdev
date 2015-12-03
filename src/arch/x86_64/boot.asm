@@ -1,4 +1,6 @@
 global start
+global gdt64_code_offset
+
 extern long_mode_start
 
 section .text
@@ -22,7 +24,8 @@ start:
     mov ds, ax  ; data selector
     mov es, ax  ; extra selector
 
-    ; far jump to 64 bit code
+    ;; No way of setting the cs (code selector) manually.
+    ;; A far jump to 64 bit code is needed
     jmp gdt64.code:long_mode_start
 
 test_multiboot:
@@ -145,17 +148,24 @@ p3_table:                   ; Page-Directory Pointer Table (PDP) or P3
     resb 4096
 p2_table:                   ; Page-Directory Table (PD) or P2
     resb 4096
+
+;;; Reserve space for the kernel stack.
 kernel_stack_bottom:
     resb 64                 ; reserve 64 bytes for the kernel stack
 kernel_stack_top:
 
 section .rodata
+;;; Global Description Table. Used to describe available segments.
 gdt64:
-    dq 0    ; zero entry
+    dq 0                                                    ; zero entry
 .code: equ $ - gdt64
-    dq (1<<44) | (1<<47) | (1<<41) | (1<<43) | (1<<53)   ; code segment
+    dq (1<<44) | (1<<47) | (1<<41) | (1<<43) | (1<<53)      ; code segment
 .data: equ $ - gdt64
-    dq (1<<44) | (1<<47) | (1<<41)  ; data segment
+    dq (1<<44) | (1<<47) | (1<<41)                          ; data segment
 .pointer:
     dw $ - gdt64 - 1
     dq gdt64
+
+;;; Export code selector so Rust can read it.
+gdt64_code_offset:
+    dw gdt64.code

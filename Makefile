@@ -51,7 +51,7 @@ cargo:
 build/arch/$(ARCH)/%.o: src/arch/$(ARCH)/%.asm
 	@echo NASM $<
 	@mkdir -p $(shell dirname $@)
-	@nasm -felf64 -o $@ $<
+	@nasm -f elf64 $< -o $@
 
 # Recompile Rust for our bare metal target
 installed_target_libs := \
