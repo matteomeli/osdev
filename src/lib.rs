@@ -13,6 +13,12 @@ mod macros;
 mod arch;
 mod console;
 
+mod std {
+    pub use core::fmt;
+    pub use core::ops;
+    pub use core::option;
+}
+
 #[no_mangle] // ensure that this symbol is called `main` in the output
 pub extern "C" fn rust_main() {
     use arch::vga::{SCREEN, CURSOR, ColorCode};

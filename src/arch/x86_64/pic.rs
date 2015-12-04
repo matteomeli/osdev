@@ -19,7 +19,6 @@
 //! Therefore we move PC1 to offset 0x20 to 0x2F and PIC2 to 0x28-0x2F.
 
 use arch::cpuio::{Port, UnsafePort};
-use spin::Mutex;
 
 /// Command to initialise the PIC
 const CMD_INIT: u8 = 0x11;
@@ -49,11 +48,14 @@ impl Pic {
     }
 
     /// Sets a mask for the Interrupt Mask register to ignore specific interrupts.
+    #[allow(dead_code)]
     unsafe fn set_mask(&mut self, interrupt_id: u8) {
         let value = self.data.read() | (1 << interrupt_id);
         self.data.write(value);
     }
 
+    /// Clears a mask for the Interrupt Mask register to ignore specific interrupts.
+    #[allow(dead_code)]
     unsafe fn clear_mask(&mut self, interrupt_id: u8) {
         let value = self.data.read() & !(1 << interrupt_id);
         self.data.write(value);
@@ -144,12 +146,25 @@ impl ChainedPics {
         }
     }
 
+    /// Set mask for a specific interrupt.
+    #[allow(dead_code)]
     pub unsafe fn set_mask(&mut self, interrupt_id: u8) {
         if self.handles_interrupt(interrupt_id) {
             if self.master.handles_interrupt(interrupt_id) {
                 self.master.set_mask(interrupt_id);
             }
             self.slave.set_mask(interrupt_id);
+        }
+    }
+
+    /// Clear mask for a specific interrupt.
+    #[allow(dead_code)]
+    pub unsafe fn clear_mask(&mut self, interrupt_id: u8) {
+        if self.handles_interrupt(interrupt_id) {
+            if self.master.handles_interrupt(interrupt_id) {
+                self.master.clear_mask(interrupt_id);
+            }
+            self.slave.clear_mask(interrupt_id);
         }
     }
 }

@@ -1,20 +1,23 @@
 //! Interrupts support
 
 use core::ptr;
-use core::fmt;
 use core::mem::size_of;
 use arch::pic::ChainedPics;
 use super::irq;
+use super::descriptor_tables;
 use spin::Mutex;
 
 const IDT_ENTRY_COUNT: usize = 256;
 
 #[allow(dead_code)]
 extern {
+    /// Offset of the code segment in the GDT defined in assembly.
     static gdt64_code_offset: u16;
 
+    /// A dummy interrupt handler defined in assembly.
     fn dummy_interrupt_handler();
 
+    /// The interrupts handlers table.
     static interrupt_handlers: [*const u8; IDT_ENTRY_COUNT];
 }
 
@@ -51,6 +54,13 @@ fn cpu_interrupt_handler(context: &InterruptStackContext) {
         context.error_code);
 
     // TODO: Print more useful information for specific interrupts, i.e. Page Faults.
+    match context.interrupt_id {
+        14 => {
+            let err = irq::PageFaultException::from_bits(context.error_code);
+            println!("{:?}", err);
+        }
+        _ => {}
+    }
 
     loop {}
 }
@@ -136,28 +146,13 @@ impl IdtEntry {
     }
 }
 
-/// A struct that wraps a pointer to data to represent an IDT
-/// and it's suitable to use within the assembly instruction lidt.
-#[derive(Debug)]
-#[repr(C, packed)]
-pub struct InterruptDescriptorTablePointer {
-    /// The size of the IDT.
-    pub limit: u16,
-    /// Pointer to the memory region containing the IDT.
-    pub base: u64,
-}
-
-/// Load the IDT into memory.
-pub unsafe fn lidt(idt: &InterruptDescriptorTablePointer) {
-    asm!("lidt ($0)" :: "r"(idt) : "memory");
-}
-
 /// Enable interrupts.
 pub unsafe fn enable() {
     asm!("sti");
 }
 
 /// Disable interrupts.
+#[allow(dead_code)]
 pub unsafe fn disable() {
     asm!("cli");
 }
@@ -202,13 +197,13 @@ impl Idt {
         }
     }
 
-    // Load the IDT table into memory.
+    /// Load the IDT table into memory.
     unsafe fn load(&self) {
-        let idt_pointer = InterruptDescriptorTablePointer {
+        let idt_pointer = descriptor_tables::DescriptorTablePointer {
             base: &self.table[0] as *const IdtEntry as u64,
             limit: (size_of::<IdtEntry>() * IDT_ENTRY_COUNT) as u16,
         };
-        lidt(&idt_pointer);
+        descriptor_tables::lidt(&idt_pointer);
     }
 }
 
@@ -216,6 +211,7 @@ static IDT: Mutex<Idt> = Mutex::new(
     Idt { table: [IdtEntry::missing_handler(); IDT_ENTRY_COUNT] }
 );
 
+/// Test a software input.
 #[allow(dead_code)]
 unsafe fn test_interrupt() {
     println!("Triggering interrupt.");

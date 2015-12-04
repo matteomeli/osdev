@@ -1,7 +1,8 @@
 ///! Interrupt Request Codes descriptions and setup
 
-use core::fmt::{Display, Formatter, Result};
+use core::fmt::{Display, Debug, Formatter, Result};
 
+/// Aggregates some information about an interrupt.
 #[derive(Debug)]
 pub struct InterruptInfo {
     id: u8,
@@ -43,3 +44,53 @@ pub static CPU_EXCEPTIONS: [InterruptInfo; 20] = [
     InterruptInfo { id: 18, has_error_code: false, mnemonic: "#MC", description: "Machine Check", irqtype: "Abort", source: "Error codes (if any) and source are model dependent" },
     InterruptInfo { id: 19, has_error_code: false, mnemonic: "#XM", description: "SIMD Floating-Point Exception", irqtype: "Fault", source: "SSE/SSE2/SSE3 floating-point instruction" },
 ];
+
+bitflags!{
+    flags PageFaultException: u32 {
+        // 0 The fault was caused by a non-present page.
+        // 1 The fault was caused by a page-level protection violation.
+        const PAGEFAULT_EXCEPTION_P =  bit!(0),
+
+        // 0 The access causing the fault was a read.
+        // 1 The access causing the fault was a write.
+        const PAGEFAULT_EXCEPTION_WR = bit!(1),
+
+        // 0 The access causing the fault originated when the processor was executing in supervisor mode (CPL < 3).
+        // 1 The access causing the fault originated when the processor was executing in user mode (CPL = 3).
+        const PAGEFAULT_EXCEPTION_US = bit!(2),
+
+        // 0 The fault was not caused by reserved bit violation.
+        // 1 The fault was caused by a reserved bit set to 1 in some paging-stucture entry.
+        const PAGEFAULT_EXCEPTION_RSVD = bit!(3),
+
+        // 0 The fault was not caused by an instruction fetch.
+        // 1 The fault was caused by an instruction fetch.
+        const PAGEFAULT_EXCEPTION_ID = bit!(4)
+    }
+}
+
+impl Debug for PageFaultException {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        let p = match self.contains(PAGEFAULT_EXCEPTION_P) {
+            false => "The fault was caused by a non-present page.",
+            true => "The fault was caused by a page-level protection violation."
+        };
+        let wr = match self.contains(PAGEFAULT_EXCEPTION_WR) {
+            false => "The access causing the fault was a read.",
+            true => "The access causing the fault was a write."
+        };
+        let us = match self.contains(PAGEFAULT_EXCEPTION_US) {
+            false => "The access causing the fault originated when the processor was executing in supervisor mode (CPL < 3).",
+            true => "The access causing the fault originated when the processor was executing in user mode (CPL = 3)."
+        };
+        let rsvd = match self.contains(PAGEFAULT_EXCEPTION_RSVD) {
+            false => "The fault was not caused by reserved bit violation.",
+            true => "The fault was caused by a reserved bit set to 1 in some paging-stucture entry."
+        };
+        let id = match self.contains(PAGEFAULT_EXCEPTION_ID) {
+            false => "The fault was not caused by an instruction fetch.",
+            true => "The fault was caused by an instruction fetch."
+        };
+        write!(f, "{}\n{}\n{}\n{}\n{}", p, wr, us, rsvd, id)
+    }
+}
