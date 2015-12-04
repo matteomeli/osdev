@@ -14,6 +14,7 @@ macro_rules! bit {
     };
 }
 
+
 macro_rules! bitflags {
     ($(#[$attr:meta])* flags $BitFlags:ident: $T:ty {
         $($(#[$Flag_attr:meta])* const $Flag:ident = $value:expr),+
@@ -26,24 +27,22 @@ macro_rules! bitflags {
 
         $($(#[$Flag_attr])* pub const $Flag: $BitFlags = $BitFlags { bits: $value };)+
 
+        #[allow(dead_code)]
         impl $BitFlags {
             /// Returns an empty set of flags.
             #[inline]
-            #[allow(dead_code)]
             pub fn empty() -> $BitFlags {
                 $BitFlags { bits: 0 }
             }
 
             /// Returns the set containing all flags.
             #[inline]
-            #[allow(dead_code)]
             pub fn all() -> $BitFlags {
                 $BitFlags { bits: $($value)|+ }
             }
 
             /// Returns the raw value of the flags currently stored.
             #[inline]
-            #[allow(dead_code)]
             pub fn bits(&self) -> $T {
                 self.bits
             }
@@ -51,7 +50,6 @@ macro_rules! bitflags {
             /// Convert from underlying bit representation, unless that
             /// representation contains bits that do not correspond to a flag.
             #[inline]
-            #[allow(dead_code)]
             pub fn from_bits(bits: $T) -> ::std::option::Option<$BitFlags> {
                 if (bits & !$BitFlags::all().bits()) != 0 {
                     ::std::option::Option::None
@@ -63,56 +61,48 @@ macro_rules! bitflags {
             /// Convert from underlying bit representation, dropping any bits
             /// that do not correspond to flags.
             #[inline]
-            #[allow(dead_code)]
             pub fn from_bits_truncate(bits: $T) -> $BitFlags {
                 $BitFlags { bits: bits } & $BitFlags::all()
             }
 
             /// Returns `true` if no flags are currently stored.
             #[inline]
-            #[allow(dead_code)]
             pub fn is_empty(&self) -> bool {
                 *self == $BitFlags::empty()
             }
 
             /// Returns `true` if all flags are currently set.
             #[inline]
-            #[allow(dead_code)]
             pub fn is_all(&self) -> bool {
                 *self == $BitFlags::all()
             }
 
             /// Returns `true` if there are flags common to both `self` and `other`.
             #[inline]
-            #[allow(dead_code)]
             pub fn intersects(&self, other: $BitFlags) -> bool {
                 !(*self & other).is_empty()
             }
 
             /// Returns `true` all of the flags in `other` are contained within `self`.
             #[inline]
-            #[allow(dead_code)]
             pub fn contains(&self, other: $BitFlags) -> bool {
                 (*self & other) == other
             }
 
             /// Inserts the specified flags in-place.
             #[inline]
-            #[allow(dead_code)]
             pub fn insert(&mut self, other: $BitFlags) {
                 self.bits |= other.bits;
             }
 
             /// Removes the specified flags in-place.
             #[inline]
-            #[allow(dead_code)]
             pub fn remove(&mut self, other: $BitFlags) {
                 self.bits &= !other.bits;
             }
 
             /// Toggles the specified flags in-place.
             #[inline]
-            #[allow(dead_code)]
             pub fn toggle(&mut self, other: $BitFlags) {
                 self.bits ^= other.bits;
             }
@@ -123,7 +113,6 @@ macro_rules! bitflags {
 
             /// Returns the union of the two sets of flags.
             #[inline]
-            #[allow(dead_code)]
             fn bitor(self, other: $BitFlags) -> $BitFlags {
                 $BitFlags { bits: self.bits | other.bits }
             }
@@ -134,7 +123,6 @@ macro_rules! bitflags {
 
             /// Returns the left flags, but with all the right flags toggled.
             #[inline]
-            #[allow(dead_code)]
             fn bitxor(self, other: $BitFlags) -> $BitFlags {
                 $BitFlags { bits: self.bits ^ other.bits }
             }
@@ -145,7 +133,6 @@ macro_rules! bitflags {
 
             /// Returns the intersection between the two sets of flags.
             #[inline]
-            #[allow(dead_code)]
             fn bitand(self, other: $BitFlags) -> $BitFlags {
                 $BitFlags { bits: self.bits & other.bits }
             }
@@ -156,7 +143,6 @@ macro_rules! bitflags {
 
             /// Returns the set difference of the two sets of flags.
             #[inline]
-            #[allow(dead_code)]
             fn sub(self, other: $BitFlags) -> $BitFlags {
                 $BitFlags { bits: self.bits & !other.bits }
             }
@@ -167,7 +153,6 @@ macro_rules! bitflags {
 
             /// Returns the complement of this set of flags.
             #[inline]
-            #[allow(dead_code)]
             fn not(self) -> $BitFlags {
                 $BitFlags { bits: !self.bits } & $BitFlags::all()
             }

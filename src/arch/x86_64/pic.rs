@@ -36,6 +36,7 @@ struct Pic {
     data: UnsafePort<u8>,
 }
 
+#[allow(dead_code)]
 impl Pic {
     /// Signal that an interrupt is being handled.
     unsafe fn end_of_interrupt(&mut self) {
@@ -48,14 +49,12 @@ impl Pic {
     }
 
     /// Sets a mask for the Interrupt Mask register to ignore specific interrupts.
-    #[allow(dead_code)]
     unsafe fn set_mask(&mut self, interrupt_id: u8) {
         let value = self.data.read() | (1 << interrupt_id);
         self.data.write(value);
     }
 
     /// Clears a mask for the Interrupt Mask register to ignore specific interrupts.
-    #[allow(dead_code)]
     unsafe fn clear_mask(&mut self, interrupt_id: u8) {
         let value = self.data.read() & !(1 << interrupt_id);
         self.data.write(value);
@@ -68,6 +67,7 @@ pub struct ChainedPics {
     slave: Pic
 }
 
+#[allow(dead_code)]
 impl ChainedPics {
     pub const unsafe fn new(offset_master: u8, offset_slave: u8) -> Self {
         ChainedPics {
@@ -147,7 +147,6 @@ impl ChainedPics {
     }
 
     /// Set mask for a specific interrupt.
-    #[allow(dead_code)]
     pub unsafe fn set_mask(&mut self, interrupt_id: u8) {
         if self.handles_interrupt(interrupt_id) {
             if self.master.handles_interrupt(interrupt_id) {
@@ -158,7 +157,6 @@ impl ChainedPics {
     }
 
     /// Clear mask for a specific interrupt.
-    #[allow(dead_code)]
     pub unsafe fn clear_mask(&mut self, interrupt_id: u8) {
         if self.handles_interrupt(interrupt_id) {
             if self.master.handles_interrupt(interrupt_id) {
