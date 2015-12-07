@@ -55,6 +55,7 @@ type Buffer = [[Char; WIDTH]; HEIGHT];
 
 /// A VGA screen in character mode.
 pub struct Screen {
+    row: usize,
     col: usize,
     colors: ColorCode,
     buffer: Unique<Buffer>,
@@ -97,12 +98,45 @@ impl Screen {
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
+            b'\t' => {
+                self.col = (self.col + 8) & !(8 - 1);
+            }
+            // Backspace
+            0x08 => {
+                if self.col > 0 {
+                    self.col -= 1;
+                    self.buffer()[self.row][self.col] = Char {
+                        code: b' ',
+                        colors: self.colors,
+                    };
+                } else {
+                    if self.row > 0 {
+                        self.row -= 1;
+                        
+                        let row = self.row;
+                        let mut col = WIDTH - 1;
+                        loop {
+                            if col == 0 {
+                                self.col = col;
+                                break;
+                            }
+
+                            if self.buffer()[row][col].code != b' ' {
+                                self.col = col + 1;
+                                break;
+                            }
+
+                            col -= 1;
+                        }
+                    }
+                }
+            },
             byte => {
                 if self.col >= WIDTH {
                     self.new_line();
                 }
 
-                let row = HEIGHT - 2;
+                let row = self.row;
                 let col = self.col;
 
                 self.buffer()[row][col] = Char {
@@ -110,10 +144,11 @@ impl Screen {
                     colors: self.colors,
                 };
                 self.col += 1;
-
-                CURSOR.lock().set(HEIGHT - 1, self.col);
             }
         }
+
+        // Set cursor
+        CURSOR.lock().set(self.row + 1, self.col);
     }
 
     fn buffer(&mut self) -> &mut Buffer {
@@ -127,9 +162,11 @@ impl Screen {
                 buffer[row] = buffer[row + 1];
             }
         }
-        self.clear_row(HEIGHT - 1);
+
         self.col = 0;
-        CURSOR.lock().set(HEIGHT - 1, self.col);
+
+        let row = self.row;
+        self.clear_row(row);
     }
 
     fn clear_row(&mut self, row: usize) {
@@ -175,6 +212,7 @@ impl Cursor {
 }
 
 pub static SCREEN: Mutex<Screen> = Mutex::new(Screen {
+    row: HEIGHT - 2,
     col: 0,
     colors: ColorCode::new(Color::White, Color::Black),
     buffer: unsafe { Unique::new(0xb8000 as *mut _) },
