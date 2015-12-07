@@ -73,7 +73,16 @@ pub unsafe extern "C" fn rust_interrupt_handler(context: &InterruptStackContext)
     match context.interrupt_id {
         0x00...0x1F => cpu_interrupt_handler(context),
         0x20 => { /* Timer */ }
-        0x21 => { /* Keyboard */ }
+        0x21 => {
+            use arch::keyboard::STATE;
+            if let Some(char) = STATE.lock().get_char() {
+                if char == '\r' {
+                    println!("");
+                } else {
+                    print!("{}", char);
+                }
+            }
+        }
         0x22 => { /* Cascade to PIC2, never raised */ }
         0x23 => { /* COM2 */ }
         0x24 => { /* COM1 */ }
