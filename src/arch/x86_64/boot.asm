@@ -140,7 +140,7 @@ error:
     mov byte  [0xb800a], al
     hlt
 
-section .bss:
+section .bss
 align 4096
 p4_table:                   ; Page-Map Level-4 Table (PML4) or P4
     resb 4096
@@ -151,7 +151,7 @@ p2_table:                   ; Page-Directory Table (PD) or P2
 
 ;;; Reserve space for the kernel stack.
 kernel_stack_bottom:
-    resb 8192               ; Reserve 8192 bytes for the kernel stack
+    resb 4096               ; Reserve 8192 bytes for the kernel stack
 kernel_stack_top:
 
 section .rodata
