@@ -6,7 +6,9 @@ extern long_mode_start
 section .text
 bits 32
 start:
-    mov esp, kernel_stack_top           ; point esp to the start of the stack (end of memory, stack grows downwards)
+    mov esp, kernel_stack_top           ; Set esp to the start of the stack
+                                        ; (top of stack memory, stack grows downwards)
+    mov edi, ebx                        ; Move Multiboot info pointer to edi
 
     call test_multiboot
     call test_cpuid
@@ -151,7 +153,7 @@ p2_table:                   ; Page-Directory Table (PD) or P2
 
 ;;; Reserve space for the kernel stack.
 kernel_stack_bottom:
-    resb 4096               ; Reserve 8192 bytes for the kernel stack
+    resb 4096               ; Reserve 4096 bytes for the kernel stack
 kernel_stack_top:
 
 section .rodata
