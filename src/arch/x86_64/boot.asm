@@ -16,6 +16,7 @@ start:
 
     call setup_page_tables
     call enable_paging
+    call setup_SSE
 
     ; load the 64bit GDT
     lgdt [gdt64.pointer]
@@ -85,6 +86,11 @@ test_long_mode:
 ; Finally, to identity map the first gigabytes of memory, use the following mapping:
 ; 1 PML4 -> 1 PDP -> 512 2MiB PD tables
 setup_page_tables:
+    ; recursive map P4
+    mov eax, p4_table
+    or eax, 0b11 ; present + writable
+    mov [p4_table + 511 * 8], eax
+
     ; map first P4 entry to P3
     mov eax, p3_table
     or eax, 0b11            ; Set present and writable flags
@@ -133,6 +139,28 @@ enable_paging:
 
     ret
 
+; Check for SSE and enable it. If it's not supported throw error "a".
+setup_SSE:
+    ; check for SSE
+    mov eax, 0x1
+    cpuid
+    test edx, 1<<25
+    jz .no_SSE
+
+    ; enable SSE
+    mov eax, cr0
+    and ax, 0xFFFB      ; clear coprocessor emulation CR0.EM
+    or ax, 0x2          ; set coprocessor monitoring  CR0.MP
+    mov cr0, eax
+    mov eax, cr4
+    or ax, 3 << 9       ; set CR4.OSFXSR and CR4.OSXMMEXCPT at the same time
+    mov cr4, eax
+
+    ret
+.no_SSE:
+    mov al, "a"
+    jmp error
+
 ; Prints `ERR: ` and the given error code to screen and hangs.
 ; parameter: error code (in ascii) in al
 error:
@@ -150,10 +178,9 @@ p3_table:                   ; Page-Directory Pointer Table (PDP) or P3
     resb 4096
 p2_table:                   ; Page-Directory Table (PD) or P2
     resb 4096
-
 ;;; Reserve space for the kernel stack.
 kernel_stack_bottom:
-    resb 4096               ; Reserve 4096 bytes for the kernel stack
+    resb 4096 * 3           ; Reserve 4096 * 3 bytes for the kernel stack
 kernel_stack_top:
 
 section .rodata

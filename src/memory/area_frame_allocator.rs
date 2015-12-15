@@ -1,8 +1,11 @@
-/// A simple frame allocator.
-
 use memory::{Frame, FrameAllocator};
 use multiboot2::{MemoryAreaIter, MemoryArea};
 
+/// A frame allocator that uses the memory areas from the multiboot information structure as
+/// source. The {kernel, multiboot}_{start, end} fields are used to avoid returning memory that is
+/// already in use.
+///
+/// `kernel_end` and `multiboot_end` are _inclusive_ bounds.
 pub struct AreaFrameAllocator {
     next_free_frame: Frame,
     current_area: Option<&'static MemoryArea>,

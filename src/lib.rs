@@ -10,6 +10,9 @@ extern crate multiboot2;
 pub use arch::interrupts::rust_interrupt_handler;
 
 #[macro_use]
+mod bitflags;
+
+#[macro_use]
 mod macros;
 mod arch;
 mod console;
@@ -72,13 +75,7 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
         kernel_start as usize, kernel_end as usize, 
         multiboot_start as usize, multiboot_end as usize, memory_map_tag.memory_areas());
 
-    for i in 0.. {
-        use memory::FrameAllocator;
-        if let None = frame_allocator.allocate_frame() {
-            println!("allocated {} frames", i);
-            break;
-        }
-    }
+    memory::test_paging(&mut frame_allocator);
 
     loop {}
 }

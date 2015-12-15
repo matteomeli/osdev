@@ -5,8 +5,5 @@ pub mod pic;
 pub mod interrupts;
 pub mod keyboard;
 
-#[macro_use]
-mod bitflags;
-
 mod irq;
 mod descriptor_tables;
