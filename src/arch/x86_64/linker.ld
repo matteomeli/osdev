@@ -8,18 +8,29 @@ SECTIONS {
         KEEP(*(.multiboot2))
     }
 
-    .text :
+    .text ALIGN(0x1000) :
     {
         *(.text .text.*)
     }
 
-    .rodata :
+    .data ALIGN(0x1000) :
+    {
+        *(.data .data.*)
+    }
+
+    .rodata ALIGN(0x1000) :
     {
         *(.rodata .rodata.*)
     }
 
-    .data.rel.ro :
+    .data.rel.ro ALIGN(0x1000) :
     {
         *(.data.rel.ro.local*) *(.data.rel.ro .data.rel.ro.*)
+    }
+
+    .bss ALIGN(0x1000) :
+    {
+        *(COMMON)
+        *(.bss)
     }
 }
