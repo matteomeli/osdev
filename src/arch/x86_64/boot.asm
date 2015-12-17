@@ -1,3 +1,5 @@
+;;; 32-bit boot code
+
 global start
 global gdt64_code_offset
 
@@ -157,7 +159,7 @@ p2_table:                   ; Page-Directory Table (PD) or P2
     resb 4096
 ;;; Reserve space for the kernel stack.
 kernel_stack_bottom:
-    resb 4096 * 3           ; Reserve 4096 * 3 bytes for the kernel stack
+    resb 4096 * 4           ; Reserve 4096 * 4 bytes for the kernel stack
 kernel_stack_top:
 
 section .rodata

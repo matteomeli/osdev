@@ -42,7 +42,7 @@ $(ISO): $(KERNEL) $(GRUB_CFG)
 
 $(KERNEL): cargo $(ASMOBJFILES) $(LINKER_SCRIPT)
 	@echo LD $(KERNEL)
-	@ld -m elf_$(ARCH) -n --gc-sections -T $(LINKER_SCRIPT) -o $@ $(ASMOBJFILES) $(RUST_OS)
+	@ld -verbose -m elf_$(ARCH) -n --gc-sections -T $(LINKER_SCRIPT) -o $@ $(ASMOBJFILES) $(RUST_OS)
 
 cargo:
 	@echo CARGO

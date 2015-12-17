@@ -1,3 +1,5 @@
+;;; Long mode
+
 global long_mode_start
 
 section .text
